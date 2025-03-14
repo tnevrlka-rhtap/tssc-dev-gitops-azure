@@ -1,0 +1,70 @@
+# Generated from templates/gitops-template/azure-pipelines.yml.njk. Do not edit directly.
+
+trigger:
+- main
+
+pool:
+  name: resourcehub
+  demands:
+  - Agent.Name -equals tnevrlka-agent
+
+variables:
+- group: tnevrlka-variables
+
+container: quay.io/redhat-appstudio/rhtap-task-runner:latest
+
+steps:
+  - bash: |
+      echo "• gather-deploy-images"
+      bash /work/rhtap/gather-deploy-images.sh
+      echo "• verify-enterprise-contract"
+      bash /work/rhtap/verify-enterprise-contract.sh
+    name: Verify Ec
+    env:
+      # Used to verify the image signature and attestation
+      COSIGN_PUBLIC_KEY: $(COSIGN_PUBLIC_KEY)
+      # URL of the BOMbastic api host (e.g. https://sbom.trustification.dev)
+      TRUSTIFICATION_BOMBASTIC_API_URL: $(TRUSTIFICATION_BOMBASTIC_API_URL)
+      # URL of the OIDC token issuer (e.g. https://sso.trustification.dev/realms/chicken)
+      TRUSTIFICATION_OIDC_ISSUER_URL: $(TRUSTIFICATION_OIDC_ISSUER_URL)
+      TRUSTIFICATION_OIDC_CLIENT_ID: $(TRUSTIFICATION_OIDC_CLIENT_ID)
+      TRUSTIFICATION_OIDC_CLIENT_SECRET: $(TRUSTIFICATION_OIDC_CLIENT_SECRET)
+      TRUSTIFICATION_SUPPORTED_CYCLONEDX_VERSION: $(TRUSTIFICATION_SUPPORTED_CYCLONEDX_VERSION)
+      # Set this to the user for your specific registry
+      # IMAGE_REGISTRY_USER: $(IMAGE_REGISTRY_USER)
+      # Set this password for your specific registry
+      # IMAGE_REGISTRY_PASSWORD: $(IMAGE_REGISTRY_PASSWORD)
+      # QUAY_IO_CREDS_USR: $(QUAY_IO_CREDS_USR)
+      # QUAY_IO_CREDS_PSW: $(QUAY_IO_CREDS_PSW)
+      # ARTIFACTORY_IO_CREDS_USR: $(ARTIFACTORY_IO_CREDS_USR)
+      # ARTIFACTORY_IO_CREDS_PSW: $(ARTIFACTORY_IO_CREDS_PSW)
+      # NEXUS_IO_CREDS_USR: $(NEXUS_IO_CREDS_USR)
+      # NEXUS_IO_CREDS_PSW: $(NEXUS_IO_CREDS_PSW)
+  - bash: |
+      echo "• gather-images-to-upload-sbom"
+      bash /work/rhtap/gather-images-to-upload-sbom.sh
+      echo "• download-sbom-from-url-in-attestation"
+      bash /work/rhtap/download-sbom-from-url-in-attestation.sh
+      echo "• upload-sbom-to-trustification"
+      bash /work/rhtap/upload-sbom-to-trustification.sh
+    name: Upload Sbom
+    env:
+      # Used to verify the image signature and attestation
+      COSIGN_PUBLIC_KEY: $(COSIGN_PUBLIC_KEY)
+      # URL of the BOMbastic api host (e.g. https://sbom.trustification.dev)
+      TRUSTIFICATION_BOMBASTIC_API_URL: $(TRUSTIFICATION_BOMBASTIC_API_URL)
+      # URL of the OIDC token issuer (e.g. https://sso.trustification.dev/realms/chicken)
+      TRUSTIFICATION_OIDC_ISSUER_URL: $(TRUSTIFICATION_OIDC_ISSUER_URL)
+      TRUSTIFICATION_OIDC_CLIENT_ID: $(TRUSTIFICATION_OIDC_CLIENT_ID)
+      TRUSTIFICATION_OIDC_CLIENT_SECRET: $(TRUSTIFICATION_OIDC_CLIENT_SECRET)
+      TRUSTIFICATION_SUPPORTED_CYCLONEDX_VERSION: $(TRUSTIFICATION_SUPPORTED_CYCLONEDX_VERSION)
+      # Set this to the user for your specific registry
+      # IMAGE_REGISTRY_USER: $(IMAGE_REGISTRY_USER)
+      # Set this password for your specific registry
+      # IMAGE_REGISTRY_PASSWORD: $(IMAGE_REGISTRY_PASSWORD)
+      # QUAY_IO_CREDS_USR: $(QUAY_IO_CREDS_USR)
+      # QUAY_IO_CREDS_PSW: $(QUAY_IO_CREDS_PSW)
+      # ARTIFACTORY_IO_CREDS_USR: $(ARTIFACTORY_IO_CREDS_USR)
+      # ARTIFACTORY_IO_CREDS_PSW: $(ARTIFACTORY_IO_CREDS_PSW)
+      # NEXUS_IO_CREDS_USR: $(NEXUS_IO_CREDS_USR)
+      # NEXUS_IO_CREDS_PSW: $(NEXUS_IO_CREDS_PSW)
